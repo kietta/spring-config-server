@@ -1,0 +1,41 @@
+---
+#Config ribbon with eureka help to direction services in load balancing
+ribbon:
+  eureka:
+    enabled: true
+---
+#Config features of API Gateway
+zuul:
+  routes:
+    inside-account-service:
+      path: /account/**
+      serviceId: InsideAccountService
+      sensitiveHeaders:
+    inside-voucher-service:
+      path: /voucher/**
+      serviceId: InsideVoucherService
+      sensitiveHeaders:
+  ratelimit:
+    enabled: true
+    repository: redis
+    behind-proxy: true
+    default-policy-list:
+      - limit: 10 #optional - request number limit per refresh interval window
+        quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+        refresh-interval: 10 #default value (in seconds)
+        type: #optional
+          - user
+          - origin
+          - url
+  #retryable: true
+---
+#Config connection with eureka. It will register this API Gateway to Eureka
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+      
